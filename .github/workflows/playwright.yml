@@ -1,15 +1,26 @@
-name: Playwright smoke tests
+name: Playwright tests
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      suite:
+        description: Which tests to run
+        type: choice
+        options:
+          - smoke
+          - all
+        default: smoke
 
 jobs:
-  smoke:
+  tests:
+    name: tests (${{ inputs.suite || 'smoke' }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      # Push events have no inputs, so they fall back to the smoke suite.
+      SUITE: ${{ inputs.suite || 'smoke' }}
       STOCKLY_PASSWORD: ${{ secrets.STOCKLY_PASSWORD }}
       # Fallback keeps the default URL if the repository variable is not set
       # (an empty BASE_URL would otherwise override the default in playwright.config.ts).
@@ -26,11 +37,17 @@ jobs:
 
       - run: npx playwright install --with-deps chromium
 
-      - run: npm run test:smoke
+      - name: Run ${{ env.SUITE }} tests
+        run: |
+          if [ "$SUITE" = "all" ]; then
+            npm test
+          else
+            npm run test:smoke
+          fi
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ env.SUITE }}
           path: playwright-report/
           retention-days: 14

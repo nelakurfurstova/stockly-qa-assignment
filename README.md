@@ -31,11 +31,13 @@ Every test is tagged in its title with either `@smoke` or `@regression`.
 |---|---|---|
 | Tests | 11 (6 API + 5 UI) | 18 (14 API + 4 UI) |
 | Covers | Main happy paths: auth 401 for read/write, paginated list, create (server-computed status), update persists, stock +1/−1; UI list with status badge and summary, SKU filter + Clear, add product + reload, Increase/Decrease stock, Edit + reload | Edge cases: SKU/name filters, invalid inputs, duplicate SKU, name length, status boundaries (0, 5/6), invalid stock deltas, stock below zero; UI empty state, required fields, negative price, pagination |
-| When it runs | On every push to `main` and manually in CI; locally before each change | Locally before a release or after larger changes (`npm run test:regression` or `npm test`) |
+| When it runs | On every push to `main` in CI (also manually with suite `smoke`); locally before each change | Manually in CI with suite `all` (together with smoke); locally before a release or after larger changes (`npm run test:regression` or `npm test`) |
 
 ## CI
-`.github/workflows/playwright.yml` runs `npm run test:smoke` on every push to `main` and manually
-(`workflow_dispatch`), and uploads `playwright-report` as an artifact even when tests fail.
+`.github/workflows/playwright.yml` ("Playwright tests") runs the smoke suite (`npm run test:smoke`) on every
+push to `main`. The full suite (smoke + regression, `npm test`) is started manually:
+Actions → Playwright tests → Run workflow → suite: `all` (the default choice `smoke` runs the smoke suite).
+Every run uploads the HTML report as the artifact `playwright-report-<suite>`, even when tests fail.
 Before it can run, set these in the GitHub repository (Settings → Secrets and variables → Actions):
 - secret `STOCKLY_PASSWORD`: the app password,
 - variable `BASE_URL`: the app URL (if it is missing, the workflow falls back to https://stockly-azure-ten.vercel.app).
