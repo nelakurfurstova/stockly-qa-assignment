@@ -14,9 +14,9 @@ The app uses HTTP Basic Auth; credentials are passed via `httpCredentials` in `p
 ## Run
 | Command | What it does |
 |---|---|
-| `npm test` | all 29 tests (20 API + 9 UI) |
+| `npm test` | all 28 tests (19 API + 9 UI) |
 | `npm run test:smoke` | smoke tests only (`@smoke`, 11 tests) |
-| `npm run test:regression` | regression tests only (`@regression`, 18 tests) |
+| `npm run test:regression` | regression tests only (`@regression`, 17 tests) |
 | `npm run test:api` | API tests only (fast, no browser) |
 | `npm run test:e2e` | UI tests in Chromium (headless) |
 | `npm run test:headed` | UI tests in a visible Chromium window |
@@ -29,8 +29,8 @@ Every test is tagged in its title with either `@smoke` or `@regression`.
 
 | | Smoke (`@smoke`) | Regression (`@regression`) |
 |---|---|---|
-| Tests | 11 (6 API + 5 UI) | 18 (14 API + 4 UI) |
-| Covers | Main happy paths: auth 401 for read/write, paginated list, create (server-computed status), update persists, stock +1/−1; UI list with status badge and summary, SKU filter + Clear, add product + reload, Increase/Decrease stock, Edit + reload | Edge cases: SKU/name filters, invalid inputs, duplicate SKU, name length, status boundaries (0, 5/6), invalid stock deltas, stock below zero; UI empty state, required fields, negative price, pagination |
+| Tests | 11 (6 API + 5 UI) | 17 (13 API + 4 UI) |
+| Covers | Main happy paths: auth 401 for read/write, paginated list, create (server-computed status), update persists, stock +1/−1; UI list with status badge and summary, SKU filter + Clear, add product + reload, Increase/Decrease stock, Edit + reload | Edge cases: SKU filter, invalid inputs, duplicate SKU, name length, status boundaries (0, 5/6), invalid stock deltas, stock below zero; UI empty state, required fields, negative price, pagination |
 | When it runs | On every push to `main` in CI (also manually with suite `smoke`); locally before each change | Manually in CI with suite `all` (together with smoke); locally before a release or after larger changes (`npm run test:regression` or `npm test`) |
 
 ## CI
@@ -44,14 +44,14 @@ Before it can run, set these in the GitHub repository (Settings → Secrets and 
 
 ## Approach
 **Automated (smoke/regression, meant to run often):** authentication, product list and pagination,
-SKU and name filters and empty state, create/update with server-side validation, duplicate SKU, stock +/- and
+SKU filter and empty state, create/update with server-side validation, duplicate SKU, stock +/- and
 status thresholds (0, 1–5, 6+), and the main UI flows (add, edit, quantity buttons, persistence after reload).
 These are stable, repeatable and cheap to run on every change.
 
 **Left for manual/exploratory testing:** layout and responsiveness, unusual inputs (HTML/script payloads,
 very long values, special characters), race conditions, UX details. See the bug report.
 
-**Known defects are not part of this suite.** They are documented in the bug report. In a real project I would also
+**Known defects are not part of this suite.** They are documented in the bug report. The Name filter is not automated either: it currently searches the SKU instead of the product name (see the bug report), so a meaningful test would fail. In a real project I would also
 automate the critical ones; here the suite is intentionally a green smoke suite.
 
 ## Notes

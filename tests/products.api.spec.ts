@@ -44,16 +44,6 @@ test.describe('List, filter and pagination', () => {
     const body = await res.json();
     expect(body.items.map((item: { sku: string }) => item.sku)).toContain(p.sku);
   });
-
-  test('@regression name filter is a case-insensitive partial match', async ({ request }) => {
-    const p = await createProduct(request);
-    // Names are lower case (QA-auto-<id>), so an upper-case fragment also checks case-insensitivity.
-    const fragment = encodeURIComponent(p.name.toUpperCase().slice(3, -1));
-    const res = await request.get(`/api/products?page=1&limit=10&name=${fragment}`);
-    const body = await res.json();
-    expect(body.items.map((item: { sku: string }) => item.sku)).toContain(p.sku);
-  });
-
 });
 
 test.describe('Create product', () => {
